@@ -1,0 +1,26 @@
+{
+  "name": "urban-it-ledger",
+  "version": "1.0.0",
+  "description": "Urban-IT Ledger Financial Management System",
+  "scripts": {
+    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+    "client:dev": "cd client && npm run dev",
+    "client:build": "cd client && npm run build",
+    "client:preview": "cd client && npm run preview",
+    "server:dev": "cd server && npm run dev",
+    "server:start": "cd server && npm run start",
+    "server:db:generate": "cd server && npm run db:generate",
+    "server:db:push": "cd server && npm run db:push",
+    "server:db:seed": "cd server && npm run db:seed",
+    "install:all": "npm install && cd client && npm install && cd ../server && npm install",
+    "build": "npm run client:build",
+    "start": "npm run server:start"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "workspaces": [
+    "client",
+    "server"
+  ]
+}
