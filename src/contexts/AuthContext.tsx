@@ -5,7 +5,7 @@ interface User {
   id: string;
   email: string;
   name: string;
-  role: 'admin' | 'user';
+  role: 'ADMIN' | 'USER';
   permission: 'read' | 'write';
 }
 
@@ -13,57 +13,89 @@ interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  isLoading: boolean;
+  isLoggingIn: boolean;
+  isVerifyingSession: boolean;
+  loginError: string | null;
+  setLoginError: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const useAuth = () => {
+export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-};
+}
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface AuthProviderProps {
+  children: React.ReactNode;
+}
+
+export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isVerifyingSession, setIsVerifyingSession] = useState(true);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
+  // Session Verification on Mount
   useEffect(() => {
-    // Check for existing session
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
+
     if (token && userData) {
-      setUser(JSON.parse(userData));
+      const parsedUser = JSON.parse(userData);
+      setUser(parsedUser);
+
+      authAPI.verifySession()
+        .then((response) => {
+          const userData: User = {
+            id: response.user.id,
+            email: response.user.email,
+            name: response.user.name,
+            role: response.user.role,
+            permission: response.user.permission.toLowerCase() as 'read' | 'write',
+          };
+          setUser(userData);
+          localStorage.setItem('user', JSON.stringify(userData));
+        })
+        .catch(() => {
+          logout();
+        })
+        .finally(() => {
+          setIsVerifyingSession(false);
+        });
+    } else {
+      setIsVerifyingSession(false);
     }
-    setIsLoading(false);
   }, []);
 
+  // Login Handler
   const login = async (email: string, password: string) => {
-    setIsLoading(true);
+    setIsLoggingIn(true);
+    setLoginError(null);
     try {
       const response = await authAPI.login(email, password);
-      
-      // Convert backend format to frontend format
-      const userData = {
+      const userData: User = {
         id: response.user.id,
         email: response.user.email,
         name: response.user.name,
-        role: response.user.role.toLowerCase() as 'admin' | 'user',
-        permission: response.user.permission.toLowerCase() as 'read' | 'write'
+        role: response.user.role,
+        permission: response.user.permission.toLowerCase() as 'read' | 'write',
       };
-      
       localStorage.setItem('token', response.token);
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
     } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Login failed');
+      const message = error.response?.data?.error || 'Invalid credentials. Please try again.';
+      setLoginError(message);
     } finally {
-      setIsLoading(false);
+      setIsLoggingIn(false);
     }
   };
 
+  // Logout Handler
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -71,8 +103,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider
+      value={{ user, login, logout, isLoggingIn, isVerifyingSession, loginError, setLoginError }}
+    >
       {children}
     </AuthContext.Provider>
   );
-};
+}

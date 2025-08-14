@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard';
 import Transactions from './pages/Transactions';
 import Reports from './pages/Reports';
 import AdminPanel from './pages/AdminPanel';
+import Register from './pages/Register';
 
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isLoading } = useAuth();
@@ -51,29 +52,40 @@ function App() {
         <TransactionProvider>
           <Router>
             <Routes>
-              <Route
-                path="/login"
-                element={
-                  <PublicRoute>
-                    <Login />
-                  </PublicRoute>
-                }
-              />
-              <Route
-                path="/"
-                element={
-                  <PrivateRoute>
-                    <Layout />
-                  </PrivateRoute>
-                }
-              >
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/transactions" element={<Transactions />} />
-                <Route path="/reports" element={<Reports />} />
-                <Route path="/admin" element={<AdminPanel />} />
-              </Route>
-            </Routes>
+  <Route
+    path="/login"
+    element={
+      <PublicRoute>
+        <Login />
+      </PublicRoute>
+    }
+  />
+  
+  <Route
+    path="/register"
+    element={
+      <PublicRoute>
+        <Register />
+      </PublicRoute>
+    }
+  />
+
+  <Route
+    path="/"
+    element={
+      <PrivateRoute>
+        <Layout />
+      </PrivateRoute>
+    }
+  >
+    <Route path="/" element={<Navigate to="/dashboard" replace />} />
+    <Route path="/dashboard" element={<Dashboard />} />
+    <Route path="/transactions" element={<Transactions />} />
+    <Route path="/reports" element={<Reports />} />
+    <Route path="/admin" element={<AdminPanel />} />
+  </Route>
+</Routes>
+
           </Router>
         </TransactionProvider>
       </ThemeProvider>

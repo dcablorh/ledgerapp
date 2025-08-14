@@ -19,7 +19,7 @@ const Layout: React.FC = () => {
     { path: '/dashboard', icon: Home, label: 'Dashboard' },
     { path: '/transactions', icon: FileText, label: 'Transactions' },
     { path: '/reports', icon: BarChart3, label: 'Reports' },
-    ...(user?.role === 'admin' ? [{ path: '/admin', icon: Users, label: 'Admin Panel' }] : []),
+    ...(user?.role === 'ADMIN' ? [{ path: '/admin', icon: Users, label: 'Admin Panel' }] : []),
   ];
 
   return (

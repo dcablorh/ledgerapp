@@ -79,9 +79,12 @@ export const TransactionProvider: React.FC<{ children: React.ReactNode }> = ({ c
   };
 
   // Load transactions on mount
-  React.useEffect(() => {
+ React.useEffect(() => {
+  const token = localStorage.getItem('token');
+  if (token) {
     refreshTransactions();
-  }, []);
+  }
+}, []);
 
   const addTransaction = async (transaction: Omit<Transaction, 'id'>) => {
     try {
