@@ -8,7 +8,6 @@ import { authMiddleware } from '../middleware/auth.js';
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// Validation schemas
 const loginSchema = z.object({
   email: z.string().email('Invalid email format'),
   password: z.string().min(1, 'Password is required')
@@ -20,7 +19,6 @@ const registerSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters')
 });
 
-// Generate JWT token
 const generateToken = (userId) => {
   return jwt.sign(
     { userId },
@@ -29,12 +27,10 @@ const generateToken = (userId) => {
   );
 };
 
-// POST /auth/login
 router.post('/login', async (req, res, next) => {
   try {
     const { email, password } = loginSchema.parse(req.body);
 
-    // Find user
     const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase() },
       select: {
@@ -52,16 +48,13 @@ router.post('/login', async (req, res, next) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Verify password
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Generate token
     const token = generateToken(user.id);
 
-    // Return user data (excluding password)
     const { password: _, ...userWithoutPassword } = user;
 
     res.json({
@@ -74,12 +67,10 @@ router.post('/login', async (req, res, next) => {
   }
 });
 
-// POST /auth/register
 router.post('/register', async (req, res, next) => {
   try {
     const { name, email, password } = registerSchema.parse(req.body);
 
-    // Check if email is approved
     const approvedUser = await prisma.approvedUser.findUnique({
       where: { email: email.toLowerCase() }
     });
@@ -90,7 +81,6 @@ router.post('/register', async (req, res, next) => {
       });
     }
 
-    // Check if user already exists
     const existingUser = await prisma.user.findUnique({
       where: { email: email.toLowerCase() }
     });
@@ -99,10 +89,8 @@ router.post('/register', async (req, res, next) => {
       return res.status(400).json({ error: 'User already exists' });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Create user with approved role and permission
     const user = await prisma.user.create({
       data: {
         name,
@@ -122,7 +110,6 @@ router.post('/register', async (req, res, next) => {
       }
     });
 
-    // Generate token
     const token = generateToken(user.id);
 
     res.status(201).json({

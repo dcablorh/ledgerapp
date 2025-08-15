@@ -1,53 +1,71 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 
-// Import routes
 import authRoutes from './routes/auth.js';
 import adminRoutes from './routes/admin.js';
 import transactionRoutes from './routes/transactions.js';
 import dashboardRoutes from './routes/dashboard.js';
 import reportsRoutes from './routes/reports.js';
-//import registerRoutes from './routes/register.js';
+import exportRoutes from './routes/export.js';
 
-// Import middleware
 import { errorHandler } from './middleware/errorHandler.js';
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 6001;
+const PORT = process.env.PORT || 3001;
 
-// Security middleware
-app.use(helmet());
+app.use(compression());
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "blob:"],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
+    },
+  },
+}));
+
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   credentials: true
 }));
 
-// Rate limiting
+app.use('/static', express.static('public', {
+  maxAge: '1y',
+  etag: true,
+  lastModified: true
+}));
+
 const limiter = rateLimit({
-  windowMs: 30 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  windowMs: 30 * 60 * 1000,
+  max: 100,
   message: 'Too many requests from this IP, please try again later.'
 });
 
 const authLimiter = rateLimit({
-  windowMs: 20 * 60 * 1000, // 15 minutes
-  max: 20, // limit each IP to 5 requests per windowMs for auth endpoints
+  windowMs: 20 * 60 * 1000,
+  max: 20,
   message: 'Too many authentication attempts, please try again later.'
 });
 
 app.use(limiter);
 app.use('/auth', authLimiter);
 
-// Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({ 
     status: 'OK', 
@@ -56,15 +74,20 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API routes
 app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
 app.use('/transactions', transactionRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/reports', reportsRoutes);
-//app.use('register', registerRoutes);
+app.use('/export', exportRoutes);
 
-// 404 handler
+app.get('/offline', (req, res) => {
+  res.json({ 
+    message: 'You are currently offline. Some features may be limited.',
+    timestamp: new Date().toISOString()
+  });
+});
+
 app.use('*', (req, res) => {
   res.status(404).json({ 
     error: 'Route not found',
@@ -72,7 +95,6 @@ app.use('*', (req, res) => {
   });
 });
 
-// Error handling middleware
 app.use(errorHandler);
 
 app.listen(PORT, () => {
