@@ -3,22 +3,18 @@
   "version": "1.0.0",
   "description": "Urban-IT Ledger Financial Management System",
   "private": true,
-  "workspaces": [
-    "frontend",
-    "backend"
-  ],
   "scripts": {
-    "dev": "concurrently \"npm run frontend:dev\" \"npm run backend:dev\"",
-    "frontend:dev": "cd frontend && npm run dev",
-    "backend:dev": "cd backend && npm run dev",
-    "install:all": "npm install && npm run frontend:install && npm run backend:install",
-    "frontend:install": "cd frontend && npm install",
-    "backend:install": "cd backend && npm install",
-    "build": "cd frontend && npm run build",
-    "start": "cd backend && npm start",
-    "backend:db:generate": "cd backend && npm run db:generate",
-    "backend:db:push": "cd backend && npm run db:push",
-    "backend:db:seed": "cd backend && npm run db:seed"
+    "dev": "docker-compose up --build",
+    "dev:detached": "docker-compose up --build -d",
+    "start": "docker-compose -f docker-compose.prod.yml up -d",
+    "stop": "docker-compose down && docker-compose -f docker-compose.prod.yml down",
+    "build": "docker-compose build",
+    "clean": "docker-compose down -v --remove-orphans && docker system prune -f",
+    "logs": "docker-compose logs -f",
+    "install:all": "cd frontend && npm install && cd ../backend && npm install",
+    "db:reset": "docker-compose exec backend npm run db:reset",
+    "db:seed": "docker-compose exec backend npm run db:seed",
+    "test": "docker-compose exec backend npm test && docker-compose exec frontend npm test"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

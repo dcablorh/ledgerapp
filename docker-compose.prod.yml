@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: urban-it-db-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: urban_it_ledger
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres123}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    networks:
+      - urban-it-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d urban_it_ledger"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: urban-it-backend-prod
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://postgres:${DB_PASSWORD:-postgres123}@db:5432/urban_it_ledger
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: 7d
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+      SEED_DATABASE: "false"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - urban-it-network
+    entrypoint: ["sh", "/app/docker-entrypoint.sh"]
+    command: ["npm", "start"]
+
+  # Frontend (Production)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: urban-it-frontend-prod
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - urban-it-network
+
+volumes:
+  postgres_data_prod:
+    driver: local
+
+networks:
+  urban-it-network:
+    driver: bridge

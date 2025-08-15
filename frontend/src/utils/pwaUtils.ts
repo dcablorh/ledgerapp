@@ -1,5 +1,6 @@
 import React from 'react';
 
+// PWA utility functions
 export class PWAUtils {
   private static swRegistration: ServiceWorkerRegistration | null = null;
 
@@ -11,17 +12,20 @@ export class PWAUtils {
         
         console.log('Service Worker registered successfully:', registration);
 
+        // Listen for updates
         registration.addEventListener('updatefound', () => {
           const newWorker = registration.installing;
           if (newWorker) {
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // New version available
                 this.showUpdateAvailable();
               }
             });
           }
         });
 
+        // Handle background sync registration
         if ('sync' in window.ServiceWorkerRegistration.prototype) {
           registration.sync.register('background-sync-transactions');
         }
@@ -64,6 +68,7 @@ export class PWAUtils {
   }
 
   private static showUpdateAvailable(): void {
+    // Show update notification to user
     const updateBanner = document.createElement('div');
     updateBanner.innerHTML = `
       <div style="
@@ -111,8 +116,14 @@ export class PWAUtils {
       }
     }
   }
+
+  static async showInstallPrompt(): Promise<void> {
+    // This will be handled by the browser's install prompt
+    // We can enhance this with custom UI if needed
+  }
 }
 
+// Network status hook for React components
 export const useNetworkStatus = () => {
   const [isOnline, setIsOnline] = React.useState(navigator.onLine);
 

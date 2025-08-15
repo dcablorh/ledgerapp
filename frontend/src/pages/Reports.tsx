@@ -14,12 +14,12 @@ import {
 } from 'recharts';
 import { Download, Calendar } from 'lucide-react';
 import { reportsAPI } from '../utils/api';
-import {generateFinancialReportPDF} from '../utils/exportPDF';
+import { Transaction } from '../types';
 
 const Reports: React.FC = () => {
   const [startDate, setStartDate] = useState('2025-01-01');
   const [endDate, setEndDate] = useState('2025-12-31');
-  const [selectedYear, setSeslectedYear] = useState(2025);
+  const [selectedYear, setSelectedYear] = useState(2025);
   const [summary, setSummary] = useState({
     totalIncome: 0,
     totalExpenditure: 0,
@@ -29,7 +29,33 @@ const Reports: React.FC = () => {
   const [monthlyData, setMonthlyData] = useState<any[]>([]);
   const [categoryData, setCategoryData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportPDF = async () => {
+    try {
+      setIsExporting(true);
+      const response = await reportsAPI.exportPDF({
+        startDate,
+        endDate,
+        companyName: 'Urban-IT Ledger'
+      });
+      
+      // Create download link
+      const blob = new Blob([response], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Urban-IT_Financial_Report_${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to export PDF:', error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const loadReportsData = async () => {
     try {
@@ -71,19 +97,13 @@ const Reports: React.FC = () => {
           </p>
         </div>
         <button
-  onClick={() =>
-    generateFinancialReportPDF({
-      businessName: 'Urban-IT',
-      startDate: startDate,
-      endDate: endDate,
-      transactions: transactions
-    })
-  }
-    className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-    disabled={isLoading}>
+          onClick={handleExportPDF}
+          className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+          disabled={isLoading || isExporting}
+        >
     <Download className="w-5 h-5" />
-     Export PDF
-      </button>
+          {isExporting ? 'Generating...' : 'Export PDF'}
+        </button>
 
       </div>
 

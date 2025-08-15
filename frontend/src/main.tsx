@@ -8,6 +8,12 @@ import { offlineStorage } from './utils/offlineStorage';
 // Initialize PWA features
 PWAUtils.registerServiceWorker();
 offlineStorage.init();
+import { PWAUtils } from './utils/pwaUtils';
+import { offlineStorage } from './utils/offlineStorage';
+
+// Initialize PWA features
+PWAUtils.registerServiceWorker();
+offlineStorage.init();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

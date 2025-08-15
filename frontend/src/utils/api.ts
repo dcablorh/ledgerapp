@@ -22,6 +22,7 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (response) => {
+    // Cache successful responses for offline use
     if (response.config.method === 'get' && response.status === 200) {
       const url = response.config.url;
       if (url?.includes('/dashboard/summary')) {
@@ -36,6 +37,11 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
+    // Handle offline scenarios
+    if (!PWAUtils.isOnline() && error.code === 'NETWORK_ERROR') {
+      return handleOfflineRequest(error.config);
+    }
+    
     if (!PWAUtils.isOnline() && error.code === 'NETWORK_ERROR') {
       return handleOfflineRequest(error.config);
     }
@@ -49,6 +55,30 @@ api.interceptors.response.use(
   }
 );
 
+// Handle offline requests
+async function handleOfflineRequest(config: any) {
+  const url = config.url;
+  
+  try {
+    if (url?.includes('/dashboard/summary')) {
+      const cachedData = await offlineStorage.getDashboardData();
+      if (cachedData) {
+        return { data: cachedData, status: 200, statusText: 'OK (Cached)' };
+      }
+    } else if (url?.includes('/transactions')) {
+      const cachedTransactions = await offlineStorage.getTransactions();
+      return { 
+        data: { transactions: cachedTransactions }, 
+        status: 200, 
+        statusText: 'OK (Cached)' 
+      };
+    }
+  } catch (error) {
+    console.error('Failed to retrieve cached data:', error);
+  }
+  
+  throw new Error('No cached data available for offline use');
+}
 async function handleOfflineRequest(config: any) {
   const url = config.url;
   
@@ -160,6 +190,16 @@ export const reportsAPI = {
     endDate?: string;
   }) => {
     const response = await api.get('/reports/summary', { params: filters });
+    return response.data;
+  },
+  exportPDF: async (filters?: {
+    startDate?: string;
+    endDate?: string;
+    companyName?: string;
+  }) => {
+    const response = await api.post('/export/financial-report', filters, {
+      responseType: 'blob'
+    });
     return response.data;
   },
   exportPDF: async (filters?: {

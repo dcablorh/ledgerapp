@@ -1,3 +1,4 @@
+// IndexedDB utilities for offline storage
 class OfflineStorage {
   private dbName = 'UrbanITLedger';
   private version = 1;
@@ -19,6 +20,7 @@ class OfflineStorage {
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
 
+        // Create object stores
         if (!db.objectStoreNames.contains('transactions')) {
           const transactionStore = db.createObjectStore('transactions', { keyPath: 'id' });
           transactionStore.createIndex('date', 'date', { unique: false });
