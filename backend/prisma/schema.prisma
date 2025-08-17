@@ -1,3 +1,6 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,42 +11,46 @@ datasource db {
 }
 
 model ApprovedUser {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  role      Role     @default(USER)
+  id         String     @id @default(uuid())
+  email      String     @unique
+  role       Role       @default(USER)
   permission Permission @default(WRITE)
-  createdAt DateTime @default(now())
+  createdAt  DateTime   @default(now()) @map("created_at")
 
   @@map("approved_users")
 }
 
 model User {
-  id           String        @id @default(uuid())
-  name         String
-  email        String        @unique
-  password     String
-  role         Role          @default(USER)
-  permission   Permission    @default(WRITE)
-  isWhitelisted Boolean      @default(false)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  transactions Transaction[]
+  id            String        @id @default(uuid())
+  name          String
+  email         String        @unique
+  password      String
+  role          Role          @default(USER)
+  permission    Permission    @default(WRITE)
+  isWhitelisted Boolean       @default(false) @map("is_whitelisted")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  transactions  Transaction[]
 
   @@map("users")
 }
 
 model Transaction {
   id          String          @id @default(uuid())
-  userId      String
+  userId      String          @map("user_id")
   type        TransactionType
   amount      Float
   category    String
   description String
   date        DateTime
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
   user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
+  @@index([date])
+  @@index([type])
+  @@index([category])
   @@map("transactions")
 }
 

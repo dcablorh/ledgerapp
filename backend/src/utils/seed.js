@@ -10,7 +10,7 @@ async function main() {
   const approvedUsers = [
     {
       email: 'kb@urbanit.com',
-      role: 'USER',
+      role: 'ADMIN',
       permission: 'WRITE'
     },
     {
@@ -22,7 +22,7 @@ async function main() {
       email: 'readonly@urbanit.com',
       role: 'USER',
       permission: 'READ'
-    }
+    },
     {
       email: 'dc@urbanit.com',
       role: 'USER',
@@ -43,7 +43,7 @@ async function main() {
   // Create actual users
   const users = [
     {
-      name: 'kb@ Smith',
+      name: 'Kwame Boateng',
       email: 'kb@urbanit.com',
       password: await bcrypt.hash('password', 12),
       role: 'ADMIN',
@@ -51,7 +51,7 @@ async function main() {
       isWhitelisted: true
     },
     {
-      name: 'Jane Doe',
+      name: 'Kofi Tetteh',
       email: 'kt@urbanit.com',
       password: await bcrypt.hash('password', 12),
       role: 'USER',
@@ -59,8 +59,16 @@ async function main() {
       isWhitelisted: true
     },
     {
-      name: 'Mike Johnson',
+      name: 'Ama Asante',
       email: 'readonly@urbanit.com',
+      password: await bcrypt.hash('password', 12),
+      role: 'USER',
+      permission: 'READ',
+      isWhitelisted: true
+    },
+    {
+      name: 'Daniel Osei',
+      email: 'dc@urbanit.com',
       password: await bcrypt.hash('password', 12),
       role: 'USER',
       permission: 'READ',
@@ -80,39 +88,82 @@ async function main() {
 
   console.log('✅ Users created');
 
-  // Create sample transactions
+  // Create sample transactions with realistic Ghana business data
   const transactions = [
+    // Income transactions
     {
-      userId: createdUsers[0].id, // John Smith
+      userId: createdUsers[0].id, // Kwame Boateng
       type: 'INCOME',
-      amount: 500,
-      category: 'Training',
-      description: 'Python course',
-      date: new Date('2025-07-18')
-    },
-    {
-      userId: createdUsers[0].id, // John Smith
-      type: 'INCOME',
-      amount: 800,
-      category: 'Training',
-      description: 'Javascript course',
-      date: new Date('2025-07-18')
-    },
-    {
-      userId: createdUsers[1].id, // Jane Doe
-      type: 'EXPENDITURE',
-      amount: 200,
-      category: 'Utilities',
-      description: 'Water Bills',
-      date: new Date('2025-07-18')
-    },
-    {
-      userId: createdUsers[0].id, // John Smith
-      type: 'EXPENDITURE',
-      amount: 190,
+      amount: 15000.00,
       category: 'Consulting',
-      description: 'Electricity bills',
-      date: new Date('2025-07-18')
+      description: 'Web Development Project - ABC Company',
+      date: new Date('2025-01-15')
+    },
+    {
+      userId: createdUsers[0].id,
+      type: 'INCOME',
+      amount: 8500.00,
+      category: 'Training',
+      description: 'React.js Training Workshop',
+      date: new Date('2025-01-10')
+    },
+    {
+      userId: createdUsers[1].id, // Kofi Tetteh
+      type: 'INCOME',
+      amount: 12000.00,
+      category: 'Product Sales',
+      description: 'Software License Sales',
+      date: new Date('2025-01-08')
+    },
+    {
+      userId: createdUsers[0].id,
+      type: 'INCOME',
+      amount: 5000.00,
+      category: 'Service Fees',
+      description: 'Technical Support Services',
+      date: new Date('2025-01-05')
+    },
+    
+    // Expenditure transactions
+    {
+      userId: createdUsers[0].id,
+      type: 'EXPENDITURE',
+      amount: 3500.00,
+      category: 'Salaries',
+      description: 'Staff Salaries - January',
+      date: new Date('2025-01-31')
+    },
+    {
+      userId: createdUsers[1].id,
+      type: 'EXPENDITURE',
+      amount: 1200.00,
+      category: 'Rent',
+      description: 'Office Rent - January',
+      date: new Date('2025-01-01')
+    },
+    {
+      userId: createdUsers[0].id,
+      type: 'EXPENDITURE',
+      amount: 800.00,
+      category: 'Utilities',
+      description: 'Electricity and Internet Bills',
+      date: new Date('2025-01-20')
+    },
+    {
+      userId: createdUsers[1].id,
+      type: 'EXPENDITURE',
+      amount: 450.00,
+      category: 'Marketing',
+      description: 'Social Media Advertising',
+      date: new Date('2025-01-12')
+    },
+    {
+      userId: createdUsers[0].id,
+      type: 'EXPENDITURE',
+      amount: 600.00,
+      category: 'Equipment',
+      description: 'Office Supplies and Hardware',
+      date: new Date('2025-01-18')
     }
   ];
 
@@ -129,6 +180,7 @@ async function main() {
   console.log('Admin: kb@urbanit.com / password');
   console.log('User: kt@urbanit.com / password');
   console.log('Read-only: readonly@urbanit.com / password');
+  console.log('Read-only: dc@urbanit.com / password');
 }
 
 main()

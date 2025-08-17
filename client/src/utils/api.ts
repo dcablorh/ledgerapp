@@ -172,6 +172,37 @@ export const reportAPI = {
   },
 };
 
+export const reportsAPI = {
+  getMonthly: async (year: number) => {
+    const response = await api.get('/reports/monthly', { params: { year } });
+    return response.data;
+  },
+  getCategory: async (filters?: {
+    startDate?: string;
+    endDate?: string;
+  }) => {
+    const response = await api.get('/reports/category', { params: filters });
+    return response.data;
+  },
+  getSummary: async (filters?: {
+    startDate?: string;
+    endDate?: string;
+  }) => {
+    const response = await api.get('/reports/summary', { params: filters });
+    return response.data;
+  },
+  exportPDF: async (filters?: {
+    startDate?: string;
+    endDate?: string;
+    companyName?: string;
+  }) => {
+    const response = await api.post('/export/financial-report', filters, {
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+};
+
 export const exportAPI = {
   generateFinancialReport: async (filters?: {
     startDate?: string;
