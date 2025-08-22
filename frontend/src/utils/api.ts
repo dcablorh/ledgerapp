@@ -2,7 +2,7 @@ import axios from 'axios';
 import { offlineStorage } from './offlineStorage';
 import { PWAUtils } from './pwaUtils';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_BASE_URL = import.meta.env.VITE_API_URL ;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -79,29 +79,7 @@ async function handleOfflineRequest(config: any) {
   
   throw new Error('No cached data available for offline use');
 }
-async function handleOfflineRequest(config: any) {
-  const url = config.url;
-  
-  try {
-    if (url?.includes('/dashboard/summary')) {
-      const cachedData = await offlineStorage.getDashboardData();
-      if (cachedData) {
-        return { data: cachedData, status: 200, statusText: 'OK (Cached)' };
-      }
-    } else if (url?.includes('/transactions')) {
-      const cachedTransactions = await offlineStorage.getTransactions();
-      return { 
-        data: { transactions: cachedTransactions }, 
-        status: 200, 
-        statusText: 'OK (Cached)' 
-      };
-    }
-  } catch (error) {
-    console.error('Failed to retrieve cached data:', error);
-  }
-  
-  throw new Error('No cached data available for offline use');
-}
+
 
 export const authAPI = {
   login: async (email: string, password: string) => {
@@ -190,16 +168,6 @@ export const reportsAPI = {
     endDate?: string;
   }) => {
     const response = await api.get('/reports/summary', { params: filters });
-    return response.data;
-  },
-  exportPDF: async (filters?: {
-    startDate?: string;
-    endDate?: string;
-    companyName?: string;
-  }) => {
-    const response = await api.post('/export/financial-report', filters, {
-      responseType: 'blob'
-    });
     return response.data;
   },
   exportPDF: async (filters?: {

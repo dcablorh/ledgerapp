@@ -10,7 +10,7 @@ interface User {
   name: string;
   email: string;
   role: 'ADMIN' | 'USER';
-  permission: 'read' | 'write';
+  permission: 'READ' | 'WRITE';
   isWhitelisted: boolean;
 }
 
@@ -24,7 +24,7 @@ const AdminPanel: React.FC = () => {
     name: '',
     email: '',
     role: 'USER' as 'ADMIN' | 'USER',
-    permission: 'write' as 'read' | 'write',
+    permission: 'WRITE' as 'READ' | 'WRITE',
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -33,7 +33,7 @@ const AdminPanel: React.FC = () => {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:6001/admin/users', {
+      const response = await axios.get('http://localhost:3001/admin/users', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -67,7 +67,7 @@ const AdminPanel: React.FC = () => {
         newUser.name
       );
       setUsers([...users, { ...addedUser, name: newUser.name, isWhitelisted: true }]);
-      setNewUser({ name: '', email: '', role: 'USER', permission: 'write' });
+      setNewUser({ name: '', email: '', role: 'USER', permission: 'WRITE' });
       setIsAddUserModalOpen(false);
     } catch (err) {
       setError('Failed to add user');
@@ -137,7 +137,7 @@ const AdminPanel: React.FC = () => {
 
   const handlePermissionChange = async (
     userId: string,
-    newPermission: 'read' | 'write'
+    newPermission: 'READ' | 'WRITE'
   ) => {
     setError(null);
     setLoading(true);
@@ -280,14 +280,14 @@ const AdminPanel: React.FC = () => {
                         onChange={(e) =>
                           handlePermissionChange(
                             user.id,
-                            e.target.value as 'read' | 'write'
+                            e.target.value as 'READ' | 'WRITE'
                           )
                         }
                         className="text-sm border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white mr-2"
                         disabled={loading}
                       >
-                        <option value="write">Write</option>
-                        <option value="read">Read</option>
+                        <option value="WRITE">Write</option>
+                        <option value="READ">Read</option>
                       </select>
                       <PermissionBadge permission={user.permission} />
                     </td>
@@ -398,14 +398,14 @@ const AdminPanel: React.FC = () => {
                       onChange={(e) =>
                         setNewUser({
                           ...newUser,
-                          permission: e.target.value as 'read' | 'write',
+                          permission: e.target.value as 'READ' | 'WRITE',
                         })
                       }
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       disabled={loading}
                     >
-                      <option value="write">Write</option>
-                      <option value="read">Read</option>
+                      <option value="WRITE">Write</option>
+                      <option value="READ">Read</option>
                     </select>
                   </div>
                 </div>
@@ -501,14 +501,14 @@ const AdminPanel: React.FC = () => {
                       onChange={(e) =>
                         setEditUser({
                           ...editUser,
-                          permission: e.target.value as 'read' | 'write',
+                          permission: e.target.value as 'READ' | 'WRITE',
                         })
                       }
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       disabled={loading}
                     >
-                      <option value="write">Write</option>
-                      <option value="read">Read</option>
+                      <option value="WRITE">Write</option>
+                      <option value="READ">Read</option>
                     </select>
                   </div>
                 </div>
